@@ -78,7 +78,8 @@
    "id": "m1",
    "name": "Ариун-Эрдэнэ",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/4-1790813286084.png"
   },
   {
    "id": "m2",
