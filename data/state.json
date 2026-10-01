@@ -1,0 +1,239 @@
+{
+ "students": [
+  {
+   "id": "f1",
+   "name": "Амирлан",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f2",
+   "name": "Анар",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f3",
+   "name": "Ариунзаяа",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f4",
+   "name": "Гэгээлэн",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f5",
+   "name": "Номинхүслэн",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f6",
+   "name": "Номин-Эрдэнэ",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f7",
+   "name": "Оюумаа",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f8",
+   "name": "Сувд",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f9",
+   "name": "Сугармаа",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f10",
+   "name": "Мичидмаа",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f11",
+   "name": "Хулан",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "f12",
+   "name": "Цэлмүүн",
+   "gender": "F",
+   "active": true
+  },
+  {
+   "id": "m1",
+   "name": "Ариун-Эрдэнэ",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m2",
+   "name": "Бадамдорж",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m3",
+   "name": "Бат-Орших",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m4",
+   "name": "Билэгжаргал",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m5",
+   "name": "Булган",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m6",
+   "name": "Ган-Очир",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m7",
+   "name": "Дөлгөөн",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m8",
+   "name": "Одбаяр",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m9",
+   "name": "Үлэмжтөгөлдөр",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m10",
+   "name": "Ханьхүү",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m11",
+   "name": "Цолмон",
+   "gender": "M",
+   "active": true
+  },
+  {
+   "id": "m12",
+   "name": "Эзэнхүү",
+   "gender": "M",
+   "active": true
+  }
+ ],
+ "studentsPerDesk": 2,
+ "deskMode": "auto",
+ "customDeskCount": 12,
+ "mixMode": "balanced",
+ "photoPattern": "",
+ "seating": [
+  {
+   "id": 1,
+   "seats": [
+    "f7",
+    "m5"
+   ]
+  },
+  {
+   "id": 2,
+   "seats": [
+    "f4",
+    "m10"
+   ]
+  },
+  {
+   "id": 3,
+   "seats": [
+    "f9",
+    "m12"
+   ]
+  },
+  {
+   "id": 4,
+   "seats": [
+    "f5",
+    "m9"
+   ]
+  },
+  {
+   "id": 5,
+   "seats": [
+    "f11",
+    "m8"
+   ]
+  },
+  {
+   "id": 6,
+   "seats": [
+    "f8",
+    "m11"
+   ]
+  },
+  {
+   "id": 7,
+   "seats": [
+    "f2",
+    "m6"
+   ]
+  },
+  {
+   "id": 8,
+   "seats": [
+    "f12",
+    "m1"
+   ]
+  },
+  {
+   "id": 9,
+   "seats": [
+    "f3",
+    "m4"
+   ]
+  },
+  {
+   "id": 10,
+   "seats": [
+    "f1",
+    "m3"
+   ]
+  },
+  {
+   "id": 11,
+   "seats": [
+    "f6",
+    "m2"
+   ]
+  },
+  {
+   "id": 12,
+   "seats": [
+    "f10",
+    "m7"
+   ]
+  }
+ ]
+}
