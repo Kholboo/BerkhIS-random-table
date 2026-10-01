@@ -32,7 +32,8 @@
    "id": "f5",
    "name": "Номинхүслэн",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/16-1790815477700.png"
   },
   {
    "id": "f6",
