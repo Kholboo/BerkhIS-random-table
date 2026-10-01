@@ -164,9 +164,10 @@
   },
   {
    "id": "m1790822436008",
-   "name": "Эрэгтэй 13",
+   "name": "Итгэл",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/13-1790814993855.png"
   }
  ],
  "studentsPerDesk": 2,
