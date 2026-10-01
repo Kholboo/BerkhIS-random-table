@@ -1,0 +1,13 @@
+{
+  "name": "class-seating",
+  "version": "1.0.0",
+  "description": "Ангийн суудлын санамсаргүй хуваарилалт — зураг, хуваарилалтыг сервэрт хадгална",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "private": true
+}

@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ангийн суудлын зохион байгуулалт</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icon CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white;
+            }
+            .desk-card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Card Shuffling Keyframes */
+        @keyframes shufflePulse {
+            0% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+            25% { transform: scale(1.03) rotate(-1.5deg); opacity: 0.8; }
+            50% { transform: scale(0.97) rotate(1.5deg); opacity: 1; }
+            75% { transform: scale(1.02) rotate(-1deg); opacity: 0.85; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .is-shuffling {
+            animation: shufflePulse 0.18s infinite ease-in-out;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important;
+            border-color: #818cf8 !important;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes countdownBounce {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-countdown-num {
+            animation: countdownBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Fullscreen celebration overlay canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-12 relative overflow-x-hidden">
+
+    <!-- Confetti Fireworks Overlay Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        
+        <!-- Header Panel -->
+        <header class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 mb-6 no-print">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-indigo-200">
+                            <i class="fa-solid fa-chair"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Ангийн суудлын зохион байгуулалт</h1>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium">Санамсаргүй суудлын хуваарилалт ба бүртгэлийн систем</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span id="saveStatus" class="text-xs font-semibold text-slate-400 no-print"></span>
+                    <button id="btnShuffle" onclick="startShufflingWithCountdown()" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-indigo-200 flex items-center gap-2">
+                        <i class="fa-solid fa-shuffle text-indigo-200"></i>
+                        <span>Санамсаргүй хуваарилах</span>
+                    </button>
+                    
+                    <button onclick="openEditModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition px-3.5 py-2.5 rounded-xl font-semibold text-sm border border-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-indigo-600"></i>
+                        <span>Нэр & Зураг засах</span>
+                    </button>
+
+                    <button onclick="confirmReset()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 active:scale-95 transition px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-1.5" title="Анхны төлөвт оруулах">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span class="hidden sm:inline">Шинэчлэх</span>
+                    </button>
+
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95 transition px-3.5 py-2.5 rounded-xl font-semibold text-sm shadow-md shadow-emerald-100 flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i>
+                        <span class="hidden sm:inline">Хэвлэх</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Controls & Configuration Toolbar -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4 no-print mb-6">
+            <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold">
+                
+                <!-- 1 ширээнд суух сурагч -->
+                <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                    <label for="studentsPerDeskSelect" class="text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-users text-indigo-600"></i>
+                        <span>1 ширээнд:</span>
+                    </label>
+                    <select id="studentsPerDeskSelect" onchange="handleDeskCapacityChange()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-bold focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <option value="1">1 сурагч</option>
+                        <option value="2" selected>2 сурагч (Хосоор)</option>
+                        <option value="3">3 сурагч</option>
+                        <option value="4">4 сурагч</option>
+                        <option value="5">5 сурагч</option>
+                        <option value="custom">Гараар оруулах...</option>
+                    </select>
+                    <input type="number" id="customStudentsPerDeskInput" min="1" max="30" value="2" onchange="updateSettings()" oninput="updateSettings()" class="hidden w-16 bg-white border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-slate-800 focus:ring-2 focus:ring-indigo-400 focus:outline-none" title="Ширээнд суух тоо">
+                </div>
+
+                <!-- Ширээний тоо -->
+                <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                    <label for="deskModeSelect" class="text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-table-cells text-indigo-600"></i>
+                        <span>Ширээний тоо:</span>
+                    </label>
+                    <select id="deskModeSelect" onchange="updateSettings()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-bold focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <option value="auto">Автомат бодох</option>
+                        <option value="custom">Гараар оруулах</option>
+                    </select>
+                    <input type="number" id="customDeskInput" min="1" max="50" value="12" onchange="updateSettings()" oninput="updateSettings()" class="hidden w-16 bg-white border border-slate-300 rounded-lg px-2 py-1 text-center font-bold text-slate-800 focus:ring-2 focus:ring-indigo-400 focus:outline-none" title="Ширээний тоо">
+                </div>
+
+                <!-- Хуваарилах горим -->
+                <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                    <label for="mixModeSelect" class="text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-venus-mars text-indigo-600"></i>
+                        <span>Горим:</span>
+                    </label>
+                    <select id="mixModeSelect" onchange="updateSettings()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-bold focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <option value="balanced">Эр + Эм тэнцвэртэй</option>
+                        <option value="random">Бүрэн санамсаргүй</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- View Toggle Buttons -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button id="viewGridBtn" onclick="switchView('grid')" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-white text-indigo-600 shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>2D Карт</span>
+                </button>
+                <button id="viewTableBtn" onclick="switchView('table')" class="px-3 py-1.5 rounded-lg font-bold text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Хүснэгт</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Stats Banner -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-slate-500">Бүртгэлтэй</div>
+                    <div id="statTotalStudents" class="text-lg font-extrabold text-slate-900">24 сурагч</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-slate-500">Оролцож буй</div>
+                    <div id="statActiveStudents" class="text-lg font-extrabold text-emerald-600">24 сурагч</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-chair"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-slate-500">Нийт ширээ</div>
+                    <div id="statTotalDesks" class="text-lg font-extrabold text-slate-900">12 ширээ</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-user-group"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-slate-500">Ширээний багтаамж</div>
+                    <div id="statDeskCapacity" class="text-lg font-extrabold text-slate-900">2 сурагч</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classroom Blackboard Indicator -->
+        <div class="bg-slate-800 text-slate-100 rounded-2xl py-3 px-6 mb-8 text-center font-black tracking-widest uppercase shadow-md flex items-center justify-center gap-3 border-b-4 border-slate-900">
+            <i class="fa-solid fa-chalkboard text-amber-400"></i>
+            <span>БАГШИЙН СҮҮДЭР / САМБАР</span>
+            <i class="fa-solid fa-chalkboard text-amber-400"></i>
+        </div>
+
+        <!-- 2D Desk Grid View -->
+        <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 min-h-[300px]">
+            <!-- Desk cards rendered dynamically here -->
+        </div>
+
+        <!-- Table View (Hidden by default) -->
+        <div id="tableView" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs font-extrabold uppercase border-b border-slate-200">
+                            <th class="py-3 px-4 w-24 text-center">Ширээ #</th>
+                            <th class="py-3 px-4">Сурагчид (Суудлын дагуу)</th>
+                            <th class="py-3 px-4 text-center">Нийт тоо</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm font-medium">
+                        <!-- Table rows rendered dynamically here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Interactive Countdown & Shuffling Overlay -->
+    <div id="countdownModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 text-center max-w-sm w-full shadow-2xl flex flex-col items-center justify-center">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 font-bold text-xs uppercase tracking-wider mb-6 animate-pulse">
+                <i class="fa-solid fa-shuffle"></i>
+                <span>Суудал санамсаргүй солигдож байна...</span>
+            </div>
+
+            <div class="relative w-36 h-36 flex items-center justify-center my-2">
+                <!-- Circular spinner border -->
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500/30 border-t-indigo-400 animate-spin"></div>
+                
+                <!-- Animated Countdown Number -->
+                <div id="countdownText" class="text-7xl font-black text-white tracking-tighter drop-shadow-lg">
+                    3
+                </div>
+            </div>
+
+            <p class="text-slate-300 text-xs font-semibold mt-6">
+                Түр хүлээнэ үү, картнууд хуваарилагдаж байна
+            </p>
+        </div>
+    </div>
+
+    <!-- Edit Students & Upload Photos Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden my-8">
+            
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base sm:text-lg">Сурагчдын жагсаалт & Зураг тохируулах</h3>
+                        <p class="text-xs text-slate-500">Сонгогдсон (чагталсан) сурагчид суудлын хуваарилалтад оролцоно.</p>
+                    </div>
+                </div>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content - Student Columns -->
+            <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
+                
+                <!-- Female Students Column -->
+                <div class="bg-white p-4 rounded-2xl border border-rose-100 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <h4 class="font-bold text-slate-800 text-sm">Эмэгтэй сурагчид (<span id="femaleCount">12</span>)</h4>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs font-semibold">
+                            <button onclick="selectAllGender('F', true)" class="text-indigo-600 hover:underline">Бүгдийг сонгох</button>
+                            <span class="text-slate-300">|</span>
+                            <button onclick="selectAllGender('F', false)" class="text-slate-500 hover:underline">Цэвэрлэх</button>
+                        </div>
+                    </div>
+                    <div id="femaleList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                        <!-- Female list items -->
+                    </div>
+                    <button onclick="addNewStudent('F')" class="mt-3 w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Эмэгтэй сурагч нэмэх</span>
+                    </button>
+                </div>
+
+                <!-- Male Students Column -->
+                <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-blue-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                            <h4 class="font-bold text-slate-800 text-sm">Эрэгтэй сурагчид (<span id="maleCount">12</span>)</h4>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs font-semibold">
+                            <button onclick="selectAllGender('M', true)" class="text-indigo-600 hover:underline">Бүгдийг сонгох</button>
+                            <span class="text-slate-300">|</span>
+                            <button onclick="selectAllGender('M', false)" class="text-slate-500 hover:underline">Цэвэрлэх</button>
+                        </div>
+                    </div>
+                    <div id="maleList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                        <!-- Male list items -->
+                    </div>
+                    <button onclick="addNewStudent('M')" class="mt-3 w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Эрэгтэй сурагч нэмэх</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="exportJSON()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg border border-slate-300 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Дата татах (JSON)</span>
+                    </button>
+                    <label class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg border border-slate-300 transition cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Дата хуулах</span>
+                        <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                    </label>
+                </div>
+                <button onclick="closeEditModal()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition shadow-md shadow-indigo-100">
+                    Хадгалах & Хаах
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Photo Crop & Edit Modal -->
+    <div id="cropModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden my-auto flex flex-col">
+            
+            <!-- Crop Modal Header -->
+            <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-crop-simple"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">Зураг засах & Тайрах</h3>
+                        <p class="text-[11px] text-slate-500">Зургийг чирч зөөх болон томруулж тааруулна уу</p>
+                    </div>
+                </div>
+                <button onclick="closeCropModal()" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Crop Canvas Viewport Container -->
+            <div class="p-5 flex flex-col items-center justify-center bg-slate-900 select-none">
+                <div class="relative w-[280px] h-[280px] rounded-2xl overflow-hidden border-2 border-indigo-500/50 shadow-2xl bg-black cursor-grab active:cursor-grabbing touch-none flex items-center justify-center">
+                    <canvas id="cropCanvas" width="280" height="280" class="block w-full h-full"></canvas>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-hand-pointer text-indigo-400"></i>
+                    <span>Чирч зөөх | Хуруугаар ойртуулж сунгана</span>
+                </p>
+            </div>
+
+            <!-- Editor Controls Toolbar -->
+            <div class="p-4 space-y-3 bg-white border-t border-slate-100">
+                <!-- Zoom Slider -->
+                <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <i class="fa-solid fa-magnifying-glass-minus text-slate-400 text-xs"></i>
+                    <input type="range" id="cropZoomRange" min="1" max="3" step="0.05" value="1" oninput="handleCropZoomInput(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg">
+                    <i class="fa-solid fa-magnifying-glass-plus text-indigo-600 text-xs"></i>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center gap-2">
+                    <button onclick="rotateCropImage()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right text-indigo-600"></i>
+                        <span>90° Эргүүлэх</span>
+                    </button>
+                    <button onclick="resetCropTransform()" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl border border-slate-200 transition" title="Анхны байдалд оруулах">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Crop Modal Footer -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2">
+                <button onclick="closeCropModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition">
+                    Цуцлах
+                </button>
+                <button onclick="confirmCropAndSave()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition shadow-md shadow-indigo-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Зураг хадгалах</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Default initial dataset of students
+        const DEFAULT_STUDENTS = [
+            { id: 'f1', name: 'Амирлан', gender: 'F', active: true, photo: null },
+            { id: 'f2', name: 'Анар', gender: 'F', active: true, photo: null },
+            { id: 'f3', name: 'Ариунзаяа', gender: 'F', active: true, photo: null },
+            { id: 'f4', name: 'Гэгээлэн', gender: 'F', active: true, photo: null },
+            { id: 'f5', name: 'Номинхүслэн', gender: 'F', active: true, photo: null },
+            { id: 'f6', name: 'Номин-Эрдэнэ', gender: 'F', active: true, photo: null },
+            { id: 'f7', name: 'Оюумаа', gender: 'F', active: true, photo: null },
+            { id: 'f8', name: 'Сувд', gender: 'F', active: true, photo: null },
+            { id: 'f9', name: 'Сугармаа', gender: 'F', active: true, photo: null },
+            { id: 'f10', name: 'Мичидмаа', gender: 'F', active: true, photo: null },
+            { id: 'f11', name: 'Хулан', gender: 'F', active: true, photo: null },
+            { id: 'f12', name: 'Цэлмүүн', gender: 'F', active: true, photo: null },
+            { id: 'm1', name: 'Ариун-Эрдэнэ', gender: 'M', active: true, photo: null },
+            { id: 'm2', name: 'Бадамдорж', gender: 'M', active: true, photo: null },
+            { id: 'm3', name: 'Бат-Орших', gender: 'M', active: true, photo: null },
+            { id: 'm4', name: 'Билэгжаргал', gender: 'M', active: true, photo: null },
+            { id: 'm5', name: 'Булган', gender: 'M', active: true, photo: null },
+            { id: 'm6', name: 'Ган-Очир', gender: 'M', active: true, photo: null },
+            { id: 'm7', name: 'Дөлгөөн', gender: 'M', active: true, photo: null },
+            { id: 'm8', name: 'Одбаяр', gender: 'M', active: true, photo: null },
+            { id: 'm9', name: 'Үлэмжтөгөлдөр', gender: 'M', active: true, photo: null },
+            { id: 'm10', name: 'Ханхүү', gender: 'M', active: true, photo: null },
+            { id: 'm11', name: 'Цолмон', gender: 'M', active: true, photo: null },
+            { id: 'm12', name: 'Эзэнхүү', gender: 'M', active: true, photo: null }
+        ];
+
+        // Global State Variables
+        let students = [];
+        let studentsPerDesk = 2;
+        let deskMode = 'auto'; // 'auto' | 'custom'
+        let customDeskCount = 12;
+        let mixMode = 'balanced'; // 'balanced' | 'random'
+        let currentSeating = []; // Array of desk objects
+
+        // Countdown & Shuffling State
+        let isShufflingInProgress = false;
+        let shuffleIntervalId = null;
+
+        // Photo Editor State Variables
+        let cropStudentId = null;
+        let cropImgObj = null;
+        let baseFitScale = 1.0;
+        let cropZoomFactor = 1.0;
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let cropRotation = 0; // 0, 90, 180, 270
+        let isDraggingCrop = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartOffsetX = 0;
+        let dragStartOffsetY = 0;
+
+        const STORAGE_KEY = 'school_seating_data_v3'; // зөвхөн хуучин өгөгдлийг нэг удаа шилжүүлэхэд
+        const API = '/api';
+        let photoMap = {};          // файлын нэр (id эсвэл нэр) -> зургийн URL
+        let savedSeating = null;    // серверээс ирсэн суудлын хуваарилалт
+        let activeSigAtOpen = '';
+        let saveTimer = null;
+
+        const clone = o => JSON.parse(JSON.stringify(o));
+        const normKey = v => String(v || '').normalize('NFC').trim().toLowerCase();
+        const photoOf = s => photoMap[normKey(s.id)] || photoMap[normKey(s.name)] || null;
+        const activeSignature = () => students.filter(s => s.active !== false).map(s => s.id).sort().join(',');
+
+        function setPhotos(list) {
+            photoMap = {};
+            (list || []).forEach(p => { photoMap[normKey(p.name)] = p.url; });
+        }
+
+        function setStatus(kind) {
+            const el = document.getElementById('saveStatus');
+            if (!el) return;
+            const map = {
+                ok: ['text-emerald-600', 'fa-circle-check', 'Сервэрт хадгалагдсан'],
+                saving: ['text-slate-400', 'fa-spinner fa-spin', 'Хадгалж байна...'],
+                error: ['text-rose-600', 'fa-triangle-exclamation', 'Сервэртэй холбогдсонгүй']
+            };
+            const [color, icon, text] = map[kind];
+            el.className = `text-xs font-semibold no-print ${color}`;
+            el.innerHTML = `<i class="fa-solid ${icon}"></i> ${text}`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            initCropCanvasListeners();
+            initConfettiCanvas();
+        });
+
+        async function initApp() {
+            await loadFromServer();
+            syncControlsUI();
+            if (!restoreSeating()) generateSeating(false);
+        }
+
+        async function loadFromServer() {
+            try {
+                const res = await fetch(`${API}/state`);
+                if (!res.ok) throw new Error(res.status);
+                const data = await res.json();
+                setPhotos(data.photos);
+                applyState(data.state || await migrateLocalStorage());
+                setStatus('ok');
+            } catch (e) {
+                console.error('Server load error', e);
+                applyState(null);
+                setStatus('error');
+            }
+        }
+
+        function applyState(st) {
+            students = (st && st.students) || clone(DEFAULT_STUDENTS);
+            students.forEach(s => { delete s.photo; });
+            studentsPerDesk = (st && st.studentsPerDesk) || 2;
+            deskMode = (st && st.deskMode) || 'auto';
+            customDeskCount = (st && st.customDeskCount) || 12;
+            mixMode = (st && st.mixMode) || 'balanced';
+            savedSeating = (st && st.seating) || null;
+        }
+
+        // Сервер хоосон үед хөтөч дэх хуучин (localStorage) өгөгдлийг зурагтай нь хамт нэг удаа шилжүүлнэ
+        async function migrateLocalStorage() {
+            try {
+                const raw = localStorage.getItem('school_seating_data_v4') || localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                const old = JSON.parse(raw);
+                for (const s of old.students || []) {
+                    if (typeof s.photo === 'string' && s.photo.startsWith('data:')) {
+                        await uploadPhotoBlob(s.id, await (await fetch(s.photo)).blob());
+                    }
+                }
+                return old;
+            } catch (e) {
+                console.warn('Migration skipped', e);
+                return null;
+            }
+        }
+
+        // Серверт хадгалсан хуваарилалтыг сэргээнэ. Сурагчдын жагсаалттай таарахгүй бол false
+        function restoreSeating() {
+            if (!Array.isArray(savedSeating)) return false;
+            const byId = new Map(students.map(s => [s.id, s]));
+            const desks = savedSeating.map(d => ({ id: d.id, seats: d.seats.map(id => byId.get(id)).filter(Boolean) }));
+            const active = students.filter(s => s.active !== false);
+            const seated = desks.flatMap(d => d.seats);
+            if (desks.length === 0 || seated.length !== active.length || !active.every(s => seated.includes(s))) return false;
+            currentSeating = desks;
+            renderSeatingView(false);
+            updateStatsBanner(active.length, desks.length);
+            return true;
+        }
+
+        function buildPayload() {
+            return {
+                students: students.map(({ photo, ...rest }) => rest),
+                studentsPerDesk, deskMode, customDeskCount, mixMode,
+                seating: currentSeating.map(d => ({ id: d.id, seats: d.seats.map(s => s.id) }))
+            };
+        }
+
+        // Өөрчлөлт бүрийг 0.4 сек хүлээгээд серверт нэг дор хадгална
+        function saveToStorage() {
+            setStatus('saving');
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(flushSave, 400);
+        }
+
+        async function flushSave() {
+            clearTimeout(saveTimer);
+            try {
+                const res = await fetch(`${API}/state`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(buildPayload())
+                });
+                if (!res.ok) throw new Error(res.status);
+                setStatus('ok');
+            } catch (e) {
+                console.error('Server save error', e);
+                setStatus('error');
+            }
+        }
+
+        async function uploadPhotoBlob(id, blob) {
+            setStatus('saving');
+            const res = await fetch(`${API}/photos/${encodeURIComponent(id)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': blob.type || 'image/jpeg' },
+                body: blob
+            });
+            if (!res.ok) throw new Error('upload ' + res.status);
+            setPhotos((await res.json()).photos);
+            setStatus('ok');
+        }
+
+        function syncControlsUI() {
+            const deskSelect = document.getElementById('studentsPerDeskSelect');
+            const customStudentsInput = document.getElementById('customStudentsPerDeskInput');
+
+            if ([1, 2, 3, 4, 5].includes(studentsPerDesk)) {
+                deskSelect.value = studentsPerDesk;
+                customStudentsInput.classList.add('hidden');
+            } else {
+                deskSelect.value = 'custom';
+                customStudentsInput.value = studentsPerDesk;
+                customStudentsInput.classList.remove('hidden');
+            }
+
+            document.getElementById('deskModeSelect').value = deskMode;
+            document.getElementById('customDeskInput').value = customDeskCount;
+            document.getElementById('mixModeSelect').value = mixMode;
+
+            const customDeskInput = document.getElementById('customDeskInput');
+            if (deskMode === 'custom') {
+                customDeskInput.classList.remove('hidden');
+            } else {
+                customDeskInput.classList.add('hidden');
+            }
+        }
+
+        function handleDeskCapacityChange() {
+            const val = document.getElementById('studentsPerDeskSelect').value;
+            const customInput = document.getElementById('customStudentsPerDeskInput');
+
+            if (val === 'custom') {
+                customInput.classList.remove('hidden');
+                studentsPerDesk = Math.max(1, parseInt(customInput.value) || 1);
+            } else {
+                customInput.classList.add('hidden');
+                studentsPerDesk = parseInt(val) || 2;
+                customInput.value = studentsPerDesk;
+            }
+            updateSettings();
+        }
+
+        function updateSettings() {
+            const deskVal = document.getElementById('studentsPerDeskSelect').value;
+            const customStudentsInput = document.getElementById('customStudentsPerDeskInput');
+
+            if (deskVal === 'custom') {
+                studentsPerDesk = Math.max(1, parseInt(customStudentsInput.value) || 1);
+            } else {
+                studentsPerDesk = parseInt(deskVal) || 2;
+            }
+
+            deskMode = document.getElementById('deskModeSelect').value;
+            customDeskCount = Math.max(1, parseInt(document.getElementById('customDeskInput').value) || 1);
+            mixMode = document.getElementById('mixModeSelect').value;
+
+            syncControlsUI();
+            saveToStorage();
+            generateSeating(false);
+        }
+
+        function startShufflingWithCountdown() {
+            if (isShufflingInProgress) return;
+
+            isShufflingInProgress = true;
+            const modal = document.getElementById('countdownModal');
+            const countdownText = document.getElementById('countdownText');
+            const btnShuffle = document.getElementById('btnShuffle');
+
+            btnShuffle.disabled = true;
+            btnShuffle.classList.add('opacity-50', 'cursor-not-allowed');
+
+            modal.classList.remove('hidden');
+
+            let secondsLeft = 3;
+            countdownText.innerText = secondsLeft;
+            countdownText.className = 'text-7xl font-black text-white tracking-tighter drop-shadow-lg animate-countdown-num';
+
+            // Rapid card shuffling animation every 90ms
+            shuffleIntervalId = setInterval(() => {
+                generateSeating(false, true); // Shuffle seating rapidly
+            }, 90);
+
+            // Timer countdown sequence
+            const timer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    // Refresh animation class to re-trigger bounce
+                    countdownText.className = 'text-7xl font-black text-white tracking-tighter drop-shadow-lg';
+                    void countdownText.offsetWidth; // trigger reflow
+                    countdownText.className = 'text-7xl font-black text-white tracking-tighter drop-shadow-lg animate-countdown-num';
+                    countdownText.innerText = secondsLeft;
+                } else {
+                    clearInterval(timer);
+                    clearInterval(shuffleIntervalId);
+
+                    // Finalize seating
+                    generateSeating(false, false);
+
+                    // Show success checkmark briefly
+                    countdownText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i>`;
+
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        isShufflingInProgress = false;
+                        btnShuffle.disabled = false;
+                        btnShuffle.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                        // Fire celebratory fireworks confetti!
+                        triggerCelebrationConfetti();
+                    }, 400);
+                }
+            }, 1000);
+        }
+
+        function generateSeating(animate = true, isShuffling = false) {
+            const activeStudents = students.filter(s => s.active !== false);
+            let totalDesks = 0;
+
+            if (deskMode === 'auto') {
+                totalDesks = Math.ceil(activeStudents.length / Math.max(1, studentsPerDesk));
+                if (totalDesks === 0) totalDesks = 1;
+            } else {
+                totalDesks = customDeskCount;
+            }
+
+            // Create array of desks
+            let desks = Array.from({ length: totalDesks }, (_, i) => ({
+                id: i + 1,
+                seats: []
+            }));
+
+            if (mixMode === 'balanced') {
+                // Separate active females and males
+                let females = shuffleArray([...activeStudents.filter(s => s.gender === 'F')]);
+                let males = shuffleArray([...activeStudents.filter(s => s.gender === 'M')]);
+
+                let deskIdx = 0;
+                while (females.length > 0 || males.length > 0) {
+                    if (desks[deskIdx].seats.length >= studentsPerDesk) {
+                        deskIdx = (deskIdx + 1) % totalDesks;
+                        if (desks.every(d => d.seats.length >= studentsPerDesk)) break;
+                        continue;
+                    }
+
+                    if (desks[deskIdx].seats.length % 2 === 0) {
+                        if (females.length > 0) {
+                            desks[deskIdx].seats.push(females.pop());
+                        } else if (males.length > 0) {
+                            desks[deskIdx].seats.push(males.pop());
+                        }
+                    } else {
+                        if (males.length > 0) {
+                            desks[deskIdx].seats.push(males.pop());
+                        } else if (females.length > 0) {
+                            desks[deskIdx].seats.push(females.pop());
+                        }
+                    }
+
+                    deskIdx = (deskIdx + 1) % totalDesks;
+                }
+            } else {
+                // Purely random mix
+                let allShuffled = shuffleArray([...activeStudents]);
+                let deskIdx = 0;
+                for (let student of allShuffled) {
+                    desks[deskIdx].seats.push(student);
+                    deskIdx = (deskIdx + 1) % totalDesks;
+                }
+            }
+
+            currentSeating = desks;
+            renderSeatingView(animate, isShuffling);
+            updateStatsBanner(activeStudents.length, totalDesks);
+            if (!isShuffling) saveToStorage();
+        }
+
+        function shuffleArray(arr) {
+            let res = [...arr];
+            for (let i = res.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [res[i], res[j]] = [res[j], res[i]];
+            }
+            return res;
+        }
+
+        function renderSeatingView(animate, isShuffling = false) {
+            const gridContainer = document.getElementById('gridView');
+            const tableBody = document.getElementById('tableBody');
+
+            gridContainer.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            currentSeating.forEach((desk) => {
+                // Render 2D Grid Desk Card
+                const card = document.createElement('div');
+                
+                let shuffleClasses = isShuffling ? 'is-shuffling' : '';
+                let popClass = (!isShuffling && animate) ? 'animate-pop-in' : '';
+
+                card.className = `desk-card bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between ${shuffleClasses} ${popClass}`;
+                
+                let seatsHTML = '';
+                if (desk.seats.length === 0) {
+                    seatsHTML = `<div class="py-6 text-center text-xs font-semibold text-slate-400 italic">Хоосон ширээ</div>`;
+                } else {
+                    seatsHTML = `<div class="grid grid-cols-${Math.min(desk.seats.length, 3)} gap-2 my-2">`;
+                    desk.seats.forEach((student) => {
+                        const isFemale = student.gender === 'F';
+                        const badgeColor = isFemale ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-blue-100 text-blue-700 border-blue-200';
+                        const avatarBg = isFemale ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600';
+                        
+                        let photoHTML = photoOf(student) 
+                            ? `<img src="${photoOf(student)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" alt="${student.name}">`
+                            : `<div class="w-12 h-12 rounded-full ${avatarBg} border-2 border-white shadow-sm flex items-center justify-center font-black text-lg">
+                                 <i class="fa-solid ${isFemale ? 'fa-user-nurse' : 'fa-user-tie'}"></i>
+                               </div>`;
+
+                        seatsHTML += `
+                            <div class="flex flex-col items-center text-center p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                ${photoHTML}
+                                <span class="mt-1.5 text-xs font-bold text-slate-800 truncate max-w-[90px]" title="${student.name}">${student.name}</span>
+                                <span class="mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${badgeColor}">
+                                    ${isFemale ? 'Эмэгтэй' : 'Эрэгтэй'}
+                                </span>
+                            </div>
+                        `;
+                    });
+                    seatsHTML += `</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="font-black text-sm text-indigo-600 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chair text-indigo-400"></i>
+                            Ширээ ${desk.id}
+                        </span>
+                        <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                            ${desk.seats.length}/${studentsPerDesk}
+                        </span>
+                    </div>
+                    ${seatsHTML}
+                `;
+                gridContainer.appendChild(card);
+
+                // Render Table Row
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                
+                let studentNames = desk.seats.map(s => `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${s.gender === 'F' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}">
+                        <i class="fa-solid ${s.gender === 'F' ? 'fa-venus' : 'fa-mars'}"></i>
+                        ${s.name}
+                    </span>
+                `).join(' ');
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-black text-center text-indigo-600">#${desk.id}</td>
+                    <td class="py-3 px-4 flex flex-wrap gap-2">${studentNames || '<span class="text-slate-400 text-xs italic">Хоосон</span>'}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-700">${desk.seats.length}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function updateStatsBanner(activeCount, deskCount) {
+            document.getElementById('statTotalStudents').innerText = `${students.length} сурагч`;
+            document.getElementById('statActiveStudents').innerText = `${activeCount} сурагч`;
+            document.getElementById('statTotalDesks').innerText = `${deskCount} ширээ`;
+            document.getElementById('statDeskCapacity').innerText = `${studentsPerDesk} сурагч`;
+        }
+
+        function switchView(viewType) {
+            const gridView = document.getElementById('gridView');
+            const tableView = document.getElementById('tableView');
+            const gridBtn = document.getElementById('viewGridBtn');
+            const tableBtn = document.getElementById('viewTableBtn');
+
+            if (viewType === 'grid') {
+                gridView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                gridBtn.className = "px-3 py-1.5 rounded-lg font-bold text-xs bg-white text-indigo-600 shadow-sm flex items-center gap-1.5 transition";
+                tableBtn.className = "px-3 py-1.5 rounded-lg font-bold text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition";
+            } else {
+                gridView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                tableBtn.className = "px-3 py-1.5 rounded-lg font-bold text-xs bg-white text-indigo-600 shadow-sm flex items-center gap-1.5 transition";
+                gridBtn.className = "px-3 py-1.5 rounded-lg font-bold text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition";
+            }
+        }
+
+        let confettiCanvas, confettiCtx;
+        let confettiParticles = [];
+        let confettiAnimationId = null;
+
+        function initConfettiCanvas() {
+            confettiCanvas = document.getElementById('confettiCanvas');
+            confettiCtx = confettiCanvas.getContext('2d');
+            resizeConfettiCanvas();
+            window.addEventListener('resize', resizeConfettiCanvas);
+        }
+
+        function resizeConfettiCanvas() {
+            if (confettiCanvas) {
+                confettiCanvas.width = window.innerWidth;
+                confettiCanvas.height = window.innerHeight;
+            }
+        }
+
+        function triggerCelebrationConfetti() {
+            const colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#f43f5e', '#14b8a6'];
+            confettiParticles = [];
+
+            const totalParticles = 140;
+            for (let i = 0; i < totalParticles; i++) {
+                // Burst from both bottom left & bottom right, or center spread
+                const originX = i % 2 === 0 ? window.innerWidth * 0.2 : window.innerWidth * 0.8;
+                confettiParticles.push({
+                    x: originX + (Math.random() * 80 - 40),
+                    y: window.innerHeight * 0.7 + (Math.random() * 40 - 20),
+                    vx: (Math.random() - 0.5) * 22,
+                    vy: -(Math.random() * 18 + 12),
+                    size: Math.random() * 8 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 12,
+                    gravity: 0.38,
+                    drag: 0.96,
+                    opacity: 1,
+                    shape: Math.random() > 0.4 ? 'rect' : 'circle'
+                });
+            }
+
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+            let activeCount = 0;
+            for (let p of confettiParticles) {
+                p.vx *= p.drag;
+                p.vy *= p.drag;
+                p.vy += p.gravity;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rotation += p.rotationSpeed;
+
+                // Fade out near bottom
+                if (p.y > confettiCanvas.height * 0.6) {
+                    p.opacity -= 0.015;
+                }
+
+                if (p.opacity > 0 && p.y < confettiCanvas.height + 50) {
+                    activeCount++;
+                    confettiCtx.save();
+                    confettiCtx.globalAlpha = Math.max(0, p.opacity);
+                    confettiCtx.translate(p.x, p.y);
+                    confettiCtx.rotate((p.rotation * Math.PI) / 180);
+
+                    confettiCtx.fillStyle = p.color;
+                    if (p.shape === 'rect') {
+                        confettiCtx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+                    } else {
+                        confettiCtx.beginPath();
+                        confettiCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                        confettiCtx.fill();
+                    }
+
+                    confettiCtx.restore();
+                }
+            }
+
+            if (activeCount > 0) {
+                confettiAnimationId = requestAnimationFrame(animateConfetti);
+            } else {
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
+        }
+
+        function openEditModal() {
+            activeSigAtOpen = activeSignature();
+            renderModalStudentLists();
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            if (activeSignature() !== activeSigAtOpen) {
+                generateSeating(false);
+            } else {
+                renderSeatingView(false);
+                saveToStorage();
+            }
+        }
+
+        function renderModalStudentLists() {
+            const femaleList = document.getElementById('femaleList');
+            const maleList = document.getElementById('maleList');
+
+            femaleList.innerHTML = '';
+            maleList.innerHTML = '';
+
+            const females = students.filter(s => s.gender === 'F');
+            const males = students.filter(s => s.gender === 'M');
+
+            document.getElementById('femaleCount').innerText = females.length;
+            document.getElementById('maleCount').innerText = males.length;
+
+            females.forEach(s => femaleList.appendChild(createStudentRowHTML(s)));
+            males.forEach(s => maleList.appendChild(createStudentRowHTML(s)));
+        }
+
+        function createStudentRowHTML(student) {
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition";
+
+            const avatarHTML = photoOf(student) 
+                ? `<img src="${photoOf(student)}" class="w-8 h-8 rounded-full object-cover border border-slate-300">`
+                : `<div class="w-8 h-8 rounded-full ${student.gender === 'F' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'} flex items-center justify-center font-bold text-xs">
+                    <i class="fa-solid ${student.gender === 'F' ? 'fa-venus' : 'fa-mars'}"></i>
+                   </div>`;
+
+            row.innerHTML = `
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <input type="checkbox" ${student.active !== false ? 'checked' : ''} onchange="toggleStudentActive('${student.id}')" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-400 cursor-pointer">
+                    
+                    <label class="relative cursor-pointer group" title="Зураг солих">
+                        ${avatarHTML}
+                        <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] transition">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <input type="file" accept="image/*" onchange="uploadStudentPhoto('${student.id}', this)" class="hidden">
+                    </label>
+
+                    <input type="text" value="${student.name}" onchange="updateStudentName('${student.id}', this.value)" class="bg-white border border-slate-300 px-2 py-1 rounded-lg text-xs font-bold text-slate-800 w-full focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                </div>
+
+                <div class="flex items-center gap-1">
+                    ${photoOf(student) ? `
+                        <button onclick="removeStudentPhoto('${student.id}')" class="text-slate-400 hover:text-rose-600 p-1 rounded-md text-xs" title="Зураг устгах">
+                            <i class="fa-solid fa-image-portrait"></i>
+                        </button>
+                    ` : ''}
+                    <button onclick="deleteStudent('${student.id}')" class="text-slate-400 hover:text-rose-600 p-1 rounded-md text-xs" title="Сурагч устгах">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `;
+            return row;
+        }
+
+        function toggleStudentActive(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                student.active = !student.active;
+                saveToStorage();
+            }
+        }
+
+        function updateStudentName(id, newName) {
+            const student = students.find(s => s.id === id);
+            if (student && newName.trim() !== '') {
+                student.name = newName.trim();
+                saveToStorage();
+            }
+        }
+
+        function selectAllGender(gender, state) {
+            students.forEach(s => {
+                if (s.gender === gender) s.active = state;
+            });
+            saveToStorage();
+            renderModalStudentLists();
+        }
+
+        function addNewStudent(gender) {
+            const newId = (gender === 'F' ? 'f' : 'm') + Date.now();
+            const count = students.filter(s => s.gender === gender).length + 1;
+            const newName = gender === 'F' ? `Эмэгтэй ${count}` : `Эрэгтэй ${count}`;
+
+            students.push({
+                id: newId,
+                name: newName,
+                gender: gender,
+                active: true,
+                photo: null
+            });
+
+            saveToStorage();
+            renderModalStudentLists();
+        }
+
+        function deleteStudent(id) {
+            students = students.filter(s => s.id !== id);
+            saveToStorage();
+            renderModalStudentLists();
+        }
+
+        function uploadStudentPhoto(id, inputElement) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    cropStudentId = id;
+                    cropImgObj = img;
+                    cropZoomFactor = 1.0;
+                    cropOffsetX = 0;
+                    cropOffsetY = 0;
+                    cropRotation = 0;
+
+                    const canvasSize = 280;
+                    const minDim = Math.min(img.width, img.height);
+                    baseFitScale = canvasSize / minDim;
+
+                    document.getElementById('cropZoomRange').value = 1.0;
+                    document.getElementById('cropModal').classList.remove('hidden');
+
+                    renderCropPreview();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            inputElement.value = '';
+        }
+
+        function initCropCanvasListeners() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas) return;
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDraggingCrop = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                dragStartOffsetX = cropOffsetX;
+                dragStartOffsetY = cropOffsetY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingCrop) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                cropOffsetX = dragStartOffsetX + dx;
+                cropOffsetY = dragStartOffsetY + dy;
+                renderCropPreview();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDraggingCrop = false;
+            });
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDraggingCrop = true;
+                    dragStartX = e.touches[0].clientX;
+                    dragStartY = e.touches[0].clientY;
+                    dragStartOffsetX = cropOffsetX;
+                    dragStartOffsetY = cropOffsetY;
+                }
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!isDraggingCrop || e.touches.length !== 1) return;
+                e.preventDefault();
+                const dx = e.touches[0].clientX - dragStartX;
+                const dy = e.touches[0].clientY - dragStartY;
+                cropOffsetX = dragStartOffsetX + dx;
+                cropOffsetY = dragStartOffsetY + dy;
+                renderCropPreview();
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', () => {
+                isDraggingCrop = false;
+            });
+
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomDelta = e.deltaY < 0 ? 0.08 : -0.08;
+                cropZoomFactor = Math.min(Math.max(1.0, cropZoomFactor + zoomDelta), 3.0);
+                document.getElementById('cropZoomRange').value = cropZoomFactor;
+                renderCropPreview();
+            }, { passive: false });
+        }
+
+        function handleCropZoomInput(val) {
+            cropZoomFactor = parseFloat(val) || 1.0;
+            renderCropPreview();
+        }
+
+        function rotateCropImage() {
+            cropRotation = (cropRotation + 90) % 360;
+            renderCropPreview();
+        }
+
+        function resetCropTransform() {
+            if (!cropImgObj) return;
+            cropZoomFactor = 1.0;
+            cropOffsetX = 0;
+            cropOffsetY = 0;
+            cropRotation = 0;
+            document.getElementById('cropZoomRange').value = 1.0;
+            renderCropPreview();
+        }
+
+        function renderCropPreview() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas || !cropImgObj) return;
+
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, w, h);
+
+            const effectiveScale = baseFitScale * cropZoomFactor;
+
+            ctx.translate(w / 2 + cropOffsetX, h / 2 + cropOffsetY);
+            ctx.rotate((cropRotation * Math.PI) / 180);
+            ctx.scale(effectiveScale, effectiveScale);
+
+            ctx.drawImage(cropImgObj, -cropImgObj.width / 2, -cropImgObj.height / 2);
+
+            ctx.restore();
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+            ctx.beginPath();
+            ctx.rect(0, 0, w, h);
+            ctx.arc(w / 2, h / 2, w / 2 - 12, 0, Math.PI * 2, true);
+            ctx.fill();
+
+            ctx.strokeStyle = '#6366f1';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(w / 2, h / 2, w / 2 - 12, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function confirmCropAndSave() {
+            if (!cropStudentId || !cropImgObj) return;
+
+            const outCanvas = document.createElement('canvas');
+            const targetSize = 180;
+            outCanvas.width = targetSize;
+            outCanvas.height = targetSize;
+            const ctx = outCanvas.getContext('2d');
+
+            const viewCanvasSize = 280;
+            const ratio = targetSize / viewCanvasSize;
+            const effectiveScale = baseFitScale * cropZoomFactor;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(targetSize / 2, targetSize / 2, targetSize / 2, 0, Math.PI * 2);
+            ctx.clip();
+
+            ctx.translate((viewCanvasSize / 2 + cropOffsetX) * ratio, (viewCanvasSize / 2 + cropOffsetY) * ratio);
+            ctx.rotate((cropRotation * Math.PI) / 180);
+            ctx.scale(effectiveScale * ratio, effectiveScale * ratio);
+
+            ctx.drawImage(cropImgObj, -cropImgObj.width / 2, -cropImgObj.height / 2);
+            ctx.restore();
+
+            const id = cropStudentId;
+            closeCropModal();
+            outCanvas.toBlob(async blob => {
+                try {
+                    await uploadPhotoBlob(id, blob);
+                } catch (e) {
+                    console.error(e);
+                    setStatus('error');
+                    alert('Зургийг серверт хадгалж чадсангүй.');
+                }
+                renderModalStudentLists();
+                renderSeatingView(false);
+            }, 'image/jpeg', 0.85);
+        }
+
+        function closeCropModal() {
+            document.getElementById('cropModal').classList.add('hidden');
+            cropStudentId = null;
+            cropImgObj = null;
+        }
+
+        async function removeStudentPhoto(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+            try {
+                const res = await fetch(`${API}/photos/${encodeURIComponent(id)}?name=${encodeURIComponent(student.name)}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error(res.status);
+                setPhotos((await res.json()).photos);
+            } catch (e) {
+                console.error(e);
+                setStatus('error');
+            }
+            renderModalStudentLists();
+            renderSeatingView(false);
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(students, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `seating_students_data_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        students = imported;
+                        for (const st of students) {
+                            if (typeof st.photo === 'string' && st.photo.startsWith('data:')) {
+                                try { await uploadPhotoBlob(st.id, await (await fetch(st.photo)).blob()); } catch (err) { console.error(err); }
+                            }
+                            delete st.photo;
+                        }
+                        saveToStorage();
+                        renderModalStudentLists();
+                        generateSeating(false);
+                    }
+                } catch (err) {
+                    console.error("Invalid JSON file", err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmReset() {
+            if (!confirm('Сурагчдын жагсаалт, тохиргоог анхны төлөвт оруулж, дахин хуваарилах уу? (Серверийн зураг устахгүй)')) return;
+            students = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+            studentsPerDesk = 2;
+            deskMode = 'auto';
+            customDeskCount = 12;
+            mixMode = 'balanced';
+
+            saveToStorage();
+            syncControlsUI();
+            generateSeating(true);
+        }
+    </script>
+</body>
+</html>
