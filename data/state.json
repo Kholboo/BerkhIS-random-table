@@ -122,7 +122,8 @@
    "id": "m7",
    "name": "Дөлгөөн",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/12-1790814806275.png"
   },
   {
    "id": "m8",
