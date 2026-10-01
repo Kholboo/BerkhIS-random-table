@@ -18,7 +18,8 @@
    "id": "f3",
    "name": "Ариунзаяа",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/5-1790813512226.png"
   },
   {
    "id": "f4",
