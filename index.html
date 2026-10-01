@@ -375,6 +375,10 @@
             <!-- Modal Footer -->
             <div class="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
+                    <button onclick="editPhotoPattern()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg border border-slate-300 transition flex items-center gap-1.5" title="Бүх зургийн вэб хаягийн загвар">
+                        <i class="fa-solid fa-link"></i>
+                        <span>Зургийн хаяг</span>
+                    </button>
                     <button onclick="exportJSON()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg border border-slate-300 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-download"></i>
                         <span>Дата татах (JSON)</span>
@@ -528,7 +532,31 @@
 
         const clone = o => JSON.parse(JSON.stringify(o));
         const normKey = v => String(v || '').normalize('NFC').trim().toLowerCase();
-        const photoOf = s => localPhotos[s.id] || photoMap[normKey(s.id)] || photoMap[normKey(s.name)] || null;
+        let photoPattern = '';      // жишээ: https://example.com/photos/{name}.jpg
+
+        // Google Drive-ийн "хуваалцах" линкийг шууд зураг болгон хувиргана
+        function normalizePhotoUrl(u) {
+            u = String(u || '').trim();
+            if (!u) return null;
+            const d = u.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || u.match(/drive\.google\.com\/.*[?&]id=([\w-]+)/);
+            return d ? `https://drive.google.com/thumbnail?id=${d[1]}&sz=w400` : u;
+        }
+        function photoFromPattern(s) {
+            if (!photoPattern) return null;
+            return photoPattern.split('{name}').join(encodeURIComponent(s.name)).split('{id}').join(encodeURIComponent(s.id));
+        }
+        function photoOf(s) {
+            const u = localPhotos[s.id] || normalizePhotoUrl(s.photoUrl)
+                || photoMap[normKey(s.id)] || photoMap[normKey(s.name)] || photoFromPattern(s);
+            return u ? u.replace(/"/g, '%22').replace(/</g, '%3C') : null;
+        }
+        // Линк нь ажиллахгүй (устсан, хаалттай) үед энгийн дүрс харуулна
+        function photoFailed(img) {
+            const d = document.createElement('div');
+            d.className = img.className.replace('object-cover', '') + ' bg-slate-200 text-slate-500 flex items-center justify-center';
+            d.innerHTML = '<i class="fa-solid fa-user"></i>';
+            img.replaceWith(d);
+        }
         const activeSignature = () => students.filter(s => s.active !== false).map(s => s.id).sort().join(',');
 
         function setPhotos(list) {
@@ -612,6 +640,7 @@
             customDeskCount = (st && st.customDeskCount) || 12;
             mixMode = (st && st.mixMode) || 'balanced';
             savedSeating = (st && st.seating) || null;
+            photoPattern = (st && st.photoPattern) || '';
         }
 
         // Сервер хоосон үед хөтөч дэх хуучин (localStorage) өгөгдлийг зурагтай нь хамт нэг удаа шилжүүлнэ
@@ -649,7 +678,7 @@
         function buildPayload() {
             return {
                 students: students.map(({ photo, ...rest }) => rest),
-                studentsPerDesk, deskMode, customDeskCount, mixMode,
+                studentsPerDesk, deskMode, customDeskCount, mixMode, photoPattern,
                 seating: currentSeating.map(d => ({ id: d.id, seats: d.seats.map(s => s.id) }))
             };
         }
@@ -915,7 +944,7 @@
                         const avatarBg = isFemale ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600';
                         
                         let photoHTML = photoOf(student) 
-                            ? `<img src="${photoOf(student)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" alt="${student.name}">`
+                            ? `<img src="${photoOf(student)}" onerror="photoFailed(this)" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" alt="${student.name}">`
                             : `<div class="w-12 h-12 rounded-full ${avatarBg} border-2 border-white shadow-sm flex items-center justify-center font-black text-lg">
                                  <i class="fa-solid ${isFemale ? 'fa-user-nurse' : 'fa-user-tie'}"></i>
                                </div>`;
@@ -1121,7 +1150,7 @@
             row.className = "flex items-center justify-between gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition";
 
             const avatarHTML = photoOf(student) 
-                ? `<img src="${photoOf(student)}" class="w-8 h-8 rounded-full object-cover border border-slate-300">`
+                ? `<img src="${photoOf(student)}" onerror="photoFailed(this)" class="w-8 h-8 rounded-full object-cover border border-slate-300">`
                 : `<div class="w-8 h-8 rounded-full ${student.gender === 'F' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'} flex items-center justify-center font-bold text-xs">
                     <i class="fa-solid ${student.gender === 'F' ? 'fa-venus' : 'fa-mars'}"></i>
                    </div>`;
@@ -1142,6 +1171,9 @@
                 </div>
 
                 <div class="flex items-center gap-1">
+                    <button onclick="editPhotoUrl('${student.id}')" class="${student.photoUrl ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-600'} p-1 rounded-md text-xs" title="Зургийн вэб линк">
+                        <i class="fa-solid fa-link"></i>
+                    </button>
                     ${photoOf(student) ? `
                         <button onclick="removeStudentPhoto('${student.id}')" class="text-slate-400 hover:text-rose-600 p-1 rounded-md text-xs" title="Зураг устгах">
                             <i class="fa-solid fa-image-portrait"></i>
@@ -1393,13 +1425,34 @@
             cropImgObj = null;
         }
 
+        function editPhotoUrl(id) {
+            const student = students.find(x => x.id === id);
+            if (!student) return;
+            const v = prompt('Зургийн вэб линк (https://...). Хоосон үлдээвэл линк устна:', student.photoUrl || '');
+            if (v === null) return;
+            student.photoUrl = v.trim() || null;
+            saveToStorage();
+            renderModalStudentLists();
+        }
+
+        function editPhotoPattern() {
+            const v = prompt('Бүх сурагчийн зургийн хаягийн загвар. {name} (нэр) эсвэл {id}-г ашиглана.\nЖишээ: https://example.com/photos/{name}.jpg\nХоосон үлдээвэл идэвхгүй болно:', photoPattern);
+            if (v === null) return;
+            photoPattern = v.trim();
+            saveToStorage();
+            renderModalStudentLists();
+            renderSeatingView(false);
+        }
+
         async function removeStudentPhoto(id) {
             const student = students.find(s => s.id === id);
             if (!student) return;
+            student.photoUrl = null;
+            saveToStorage();
             if (staticMode) {
                 delete localPhotos[id];
                 persistLocalPhotos();
-                if (photoOf(student)) alert('Энэ зураг repo-ийн photos/ хавтсанд байгаа тул тэндээс нь устгана уу.');
+                if (photoOf(student)) alert('Энэ зураг repo-ийн photos/ хавтсаас эсвэл зургийн хаягийн загвараас ирж байна.');
                 renderModalStudentLists();
                 renderSeatingView(false);
                 return;
