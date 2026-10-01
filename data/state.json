@@ -100,7 +100,8 @@
    "id": "m4",
    "name": "Билэгжаргал",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/8-1790813884331.png"
   },
   {
    "id": "m5",
