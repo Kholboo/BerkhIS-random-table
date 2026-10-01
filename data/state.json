@@ -25,7 +25,8 @@
    "id": "f4",
    "name": "Гэгээлэн",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/11-1790814844966.png"
   },
   {
    "id": "f5",
