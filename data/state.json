@@ -53,7 +53,8 @@
    "id": "f8",
    "name": "Сувд",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/19-1790815776405.png"
   },
   {
    "id": "f9",
