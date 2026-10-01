@@ -11,7 +11,8 @@
    "id": "f2",
    "name": "Анар",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/2-1790813331086.png"
   },
   {
    "id": "f3",
