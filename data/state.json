@@ -132,7 +132,8 @@
    "id": "m8",
    "name": "Одбаяр",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/17-1790815574393.png"
   },
   {
    "id": "m9",
