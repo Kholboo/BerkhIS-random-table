@@ -145,6 +145,12 @@
    "name": "Эзэнхүү",
    "gender": "M",
    "active": true
+  },
+  {
+   "id": "f1790822312917",
+   "name": "Эмэгтэй 13",
+   "gender": "F",
+   "active": true
   }
  ],
  "studentsPerDesk": 2,
