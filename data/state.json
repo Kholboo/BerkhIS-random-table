@@ -74,7 +74,8 @@
    "id": "f11",
    "name": "Хулан",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/23-1790816141142.png"
   },
   {
    "id": "f12",
