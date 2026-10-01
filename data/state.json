@@ -62,7 +62,8 @@
    "id": "f10",
    "name": "Мичидмаа",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/14-1790815382645.png"
   },
   {
    "id": "f11",
