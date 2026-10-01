@@ -142,7 +142,8 @@
    "id": "m9",
    "name": "Үлэмжтөгөлдөр",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/21-1790815972324.png"
   },
   {
    "id": "m10",
