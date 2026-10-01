@@ -149,7 +149,8 @@
    "id": "m10",
    "name": "Ханьхүү",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/22-1790816068785.png"
   },
   {
    "id": "m11",
