@@ -6,8 +6,9 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const PHOTO_DIR = path.join(__dirname, 'photos');   // сурагчдын зураг
-const DATA_DIR = path.join(__dirname, 'data');      // суудлын хуваарилалт, жагсаалт
+// Хостинг дээр дахин ачаалахад файл устдаг бол DATA_DIR, PHOTO_DIR-ийг байнгын (persistent) дискний замаар зааж өгнө
+const PHOTO_DIR = path.resolve(process.env.PHOTO_DIR || path.join(__dirname, 'photos')); // сурагчдын зураг
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));     // жагсаалт, хуваарилалт
 const STATE_FILE = path.join(DATA_DIR, 'state.json');
 const MAX_BODY = 8 * 1024 * 1024;
 
@@ -18,7 +19,12 @@ const MIME = {
 };
 const UPLOAD_EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
 
-[PHOTO_DIR, DATA_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
+[PHOTO_DIR, DATA_DIR].forEach(d => {
+  try { fs.mkdirSync(d, { recursive: true }); fs.accessSync(d, fs.constants.W_OK); }
+  catch (e) { console.error(`АНХААРУУЛГА: "${d}" хавтсанд бичих боломжгүй — хадгалалт ажиллахгүй. (${e.message})`); }
+});
+
+const isWritable = d => { try { fs.accessSync(d, fs.constants.W_OK); return true; } catch (e) { return false; } };
 
 const json = (res, code, obj) => {
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -75,6 +81,9 @@ const server = http.createServer(async (req, res) => {
     const p = url.pathname;
 
     // ---- API ----
+    if (p === '/api/health' && req.method === 'GET') {
+      return json(res, 200, { ok: true, dataWritable: isWritable(DATA_DIR), photosWritable: isWritable(PHOTO_DIR), stateSaved: fs.existsSync(STATE_FILE) });
+    }
     if (p === '/api/state' && req.method === 'GET') {
       let state = null;
       try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } catch (e) { /* анхны удаа */ }
@@ -118,4 +127,4 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`Сервер ажиллаж байна: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Сервер ажиллаж байна: http://localhost:${PORT}\nӨгөгдөл: ${DATA_DIR}\nЗураг:   ${PHOTO_DIR}`));
