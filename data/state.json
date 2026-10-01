@@ -86,7 +86,8 @@
    "id": "m2",
    "name": "Бадамдорж",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/6-1790813654785.png"
   },
   {
    "id": "m3",
