@@ -93,7 +93,8 @@
    "id": "m3",
    "name": "Бат-Орших",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/7-1790813787009.png"
   },
   {
    "id": "m4",
