@@ -186,28 +186,28 @@
  "studentsPerDesk": 2,
  "deskMode": "auto",
  "customDeskCount": 12,
- "mixMode": "random",
+ "mixMode": "balanced",
  "photoPattern": "",
  "seating": [
   {
    "id": 1,
    "seats": [
-    "f8",
-    "m10"
+    "f9",
+    "m11"
    ]
   },
   {
    "id": 2,
    "seats": [
-    "m5",
-    "m8"
+    "f4",
+    "m1790822436008"
    ]
   },
   {
    "id": 3,
    "seats": [
-    "f4",
-    "f12"
+    "f5",
+    "m8"
    ]
   },
   {
@@ -220,64 +220,64 @@
   {
    "id": 5,
    "seats": [
-    "m1",
-    "m12"
+    "f3",
+    "m9"
    ]
   },
   {
    "id": 6,
    "seats": [
-    "f2",
-    "f3"
+    "f8",
+    "m1"
    ]
   },
   {
    "id": 7,
    "seats": [
-    "m11",
-    "m4"
+    "f6",
+    "m3"
    ]
   },
   {
    "id": 8,
    "seats": [
-    "f9",
-    "m3"
+    "f7",
+    "m4"
    ]
   },
   {
    "id": 9,
    "seats": [
-    "f7",
-    "f5"
+    "f1",
+    "m10"
    ]
   },
   {
    "id": 10,
    "seats": [
-    "m1790822436008",
-    "f11"
+    "f11",
+    "m5"
    ]
   },
   {
    "id": 11,
    "seats": [
-    "m2",
-    "f1"
+    "f2",
+    "m2"
    ]
   },
   {
    "id": 12,
    "seats": [
-    "m9",
+    "f10",
     "m6"
    ]
   },
   {
    "id": 13,
    "seats": [
-    "f6",
-    "f10"
+    "f12",
+    "m12"
    ]
   }
  ]
