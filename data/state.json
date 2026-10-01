@@ -107,7 +107,8 @@
    "id": "m5",
    "name": "Булган",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/9-1790814015202.png"
   },
   {
    "id": "m6",
