@@ -148,9 +148,10 @@
   },
   {
    "id": "f1790822312917",
-   "name": "Эмэгтэй 13",
+   "name": "Ану-Үжин",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/3-1790813088208.png"
   }
  ],
  "studentsPerDesk": 2,
