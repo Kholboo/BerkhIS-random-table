@@ -165,7 +165,8 @@
    "id": "m12",
    "name": "Эзэнхүү",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/26-1790816475315.png"
   },
   {
    "id": "f1790822312917",
@@ -191,42 +192,42 @@
   {
    "id": 1,
    "seats": [
-    "f7",
-    "m5"
+    "f12",
+    "m10"
    ]
   },
   {
    "id": 2,
    "seats": [
-    "f4",
-    "m10"
+    "f1",
+    "m1"
    ]
   },
   {
    "id": 3,
    "seats": [
     "f9",
-    "m12"
+    "m9"
    ]
   },
   {
    "id": 4,
    "seats": [
-    "f5",
-    "m9"
+    "f4",
+    "m4"
    ]
   },
   {
    "id": 5,
    "seats": [
-    "f11",
-    "m8"
+    "f1790822312917",
+    "m1790822436008"
    ]
   },
   {
    "id": 6,
    "seats": [
-    "f8",
+    "f6",
     "m11"
    ]
   },
@@ -234,41 +235,48 @@
    "id": 7,
    "seats": [
     "f2",
-    "m6"
+    "m8"
    ]
   },
   {
    "id": 8,
    "seats": [
-    "f12",
-    "m1"
+    "f7",
+    "m5"
    ]
   },
   {
    "id": 9,
    "seats": [
     "f3",
-    "m4"
+    "m6"
    ]
   },
   {
    "id": 10,
    "seats": [
-    "f1",
-    "m3"
+    "f5",
+    "m12"
    ]
   },
   {
    "id": 11,
    "seats": [
-    "f6",
+    "f10",
     "m2"
    ]
   },
   {
    "id": 12,
    "seats": [
-    "f10",
+    "f8",
+    "m3"
+   ]
+  },
+  {
+   "id": 13,
+   "seats": [
+    "f11",
     "m7"
    ]
   }
