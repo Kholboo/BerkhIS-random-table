@@ -186,98 +186,98 @@
  "studentsPerDesk": 2,
  "deskMode": "auto",
  "customDeskCount": 12,
- "mixMode": "balanced",
+ "mixMode": "random",
  "photoPattern": "",
  "seating": [
   {
    "id": 1,
    "seats": [
-    "f11",
-    "m4"
+    "f8",
+    "m10"
    ]
   },
   {
    "id": 2,
    "seats": [
-    "f8",
-    "m6"
+    "m5",
+    "m8"
    ]
   },
   {
    "id": 3,
    "seats": [
-    "f6",
-    "m1"
+    "f4",
+    "f12"
    ]
   },
   {
    "id": 4,
    "seats": [
     "f1790822312917",
-    "m5"
+    "m7"
    ]
   },
   {
    "id": 5,
    "seats": [
-    "f3",
-    "m7"
+    "m1",
+    "m12"
    ]
   },
   {
    "id": 6,
    "seats": [
-    "f10",
-    "m11"
+    "f2",
+    "f3"
    ]
   },
   {
    "id": 7,
    "seats": [
-    "f4",
-    "m3"
+    "m11",
+    "m4"
    ]
   },
   {
    "id": 8,
    "seats": [
-    "f5",
-    "m10"
+    "f9",
+    "m3"
    ]
   },
   {
    "id": 9,
    "seats": [
-    "f1",
-    "m1790822436008"
+    "f7",
+    "f5"
    ]
   },
   {
    "id": 10,
    "seats": [
-    "f9",
-    "m9"
+    "m1790822436008",
+    "f11"
    ]
   },
   {
    "id": 11,
    "seats": [
-    "f2",
-    "m2"
+    "m2",
+    "f1"
    ]
   },
   {
    "id": 12,
    "seats": [
-    "f12",
-    "m12"
+    "m9",
+    "m6"
    ]
   },
   {
    "id": 13,
    "seats": [
-    "f7",
-    "m8"
+    "f6",
+    "f10"
    ]
   }
  ]
