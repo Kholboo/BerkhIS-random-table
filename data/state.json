@@ -60,7 +60,8 @@
    "id": "f9",
    "name": "Сугармаа",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/20-1790815851328.png"
   },
   {
    "id": "f10",
