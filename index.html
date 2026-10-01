@@ -483,7 +483,7 @@
             { id: 'm7', name: 'Дөлгөөн', gender: 'M', active: true, photo: null },
             { id: 'm8', name: 'Одбаяр', gender: 'M', active: true, photo: null },
             { id: 'm9', name: 'Үлэмжтөгөлдөр', gender: 'M', active: true, photo: null },
-            { id: 'm10', name: 'Ханхүү', gender: 'M', active: true, photo: null },
+            { id: 'm10', name: 'Ханьхүү', gender: 'M', active: true, photo: null },
             { id: 'm11', name: 'Цолмон', gender: 'M', active: true, photo: null },
             { id: 'm12', name: 'Эзэнхүү', gender: 'M', active: true, photo: null }
         ];
@@ -515,15 +515,20 @@
         let dragStartOffsetY = 0;
 
         const STORAGE_KEY = 'school_seating_data_v3'; // зөвхөн хуучин өгөгдлийг нэг удаа шилжүүлэхэд
-        const API = '/api';
+        const API = 'api';
         let photoMap = {};          // файлын нэр (id эсвэл нэр) -> зургийн URL
         let savedSeating = null;    // серверээс ирсэн суудлын хуваарилалт
         let activeSigAtOpen = '';
         let saveTimer = null;
+        // Сервэргүй (GitHub Pages) үед: хадгалалт нь зөвхөн энэ хөтөч дээр, зураг repo-ийн photos/ хавтсаас
+        let staticMode = false;
+        let localPhotos = {};       // энэ хөтөч дээр оруулсан зургууд: id -> dataURL
+        const LS_STATE = 'school_seating_static_v1';
+        const LS_PHOTOS = 'school_seating_photos_v1';
 
         const clone = o => JSON.parse(JSON.stringify(o));
         const normKey = v => String(v || '').normalize('NFC').trim().toLowerCase();
-        const photoOf = s => photoMap[normKey(s.id)] || photoMap[normKey(s.name)] || null;
+        const photoOf = s => localPhotos[s.id] || photoMap[normKey(s.id)] || photoMap[normKey(s.name)] || null;
         const activeSignature = () => students.filter(s => s.active !== false).map(s => s.id).sort().join(',');
 
         function setPhotos(list) {
@@ -537,7 +542,8 @@
             const map = {
                 ok: ['text-emerald-600', 'fa-circle-check', 'Сервэрт хадгалагдсан'],
                 saving: ['text-slate-400', 'fa-spinner fa-spin', 'Хадгалж байна...'],
-                error: ['text-rose-600', 'fa-triangle-exclamation', 'Сервэртэй холбогдсонгүй']
+                local: ['text-emerald-600', 'fa-circle-check', 'Энэ хөтөч дээр хадгалагдсан'],
+                error: ['text-rose-600', 'fa-triangle-exclamation', 'Хадгалж чадсангүй']
             };
             const [color, icon, text] = map[kind];
             el.className = `text-xs font-semibold no-print ${color}`;
@@ -565,10 +571,37 @@
                 applyState(data.state || await migrateLocalStorage());
                 setStatus('ok');
             } catch (e) {
-                console.error('Server load error', e);
-                applyState(null);
-                setStatus('error');
+                console.info('Сервэр олдсонгүй, хөтчийн хадгалалтын горимд шилжлээ', e);
+                await loadStatic();
             }
+        }
+
+        // GitHub Pages горим: зураг repo-ийн photos/photos.json жагсаалтаас, төлөв localStorage-оос
+        async function loadStatic() {
+            staticMode = true;
+            try {
+                const res = await fetch('photos/photos.json', { cache: 'no-cache' });
+                if (res.ok) {
+                    setPhotos((await res.json()).map(file => ({
+                        name: file.replace(/\.[^.]+$/, ''),
+                        url: 'photos/' + encodeURIComponent(file)
+                    })));
+                }
+            } catch (e) { console.warn('photos.json олдсонгүй', e); }
+            try { localPhotos = JSON.parse(localStorage.getItem(LS_PHOTOS) || '{}'); } catch (e) { localPhotos = {}; }
+            let st = null;
+            try { st = JSON.parse(localStorage.getItem(LS_STATE) || localStorage.getItem('school_seating_data_v4') || 'null'); } catch (e) { st = null; }
+            ((st && st.students) || []).forEach(s => {
+                if (typeof s.photo === 'string' && s.photo.startsWith('data:')) localPhotos[s.id] = s.photo;
+            });
+            applyState(st);
+            persistLocalPhotos();
+            setStatus('local');
+        }
+
+        function persistLocalPhotos() {
+            try { localStorage.setItem(LS_PHOTOS, JSON.stringify(localPhotos)); }
+            catch (e) { console.warn(e); alert('Зургийг хөтөч дээр хадгалах зай дүүрсэн байна.'); }
         }
 
         function applyState(st) {
@@ -630,6 +663,11 @@
 
         async function flushSave() {
             clearTimeout(saveTimer);
+            if (staticMode) {
+                try { localStorage.setItem(LS_STATE, JSON.stringify(buildPayload())); setStatus('local'); }
+                catch (e) { console.error(e); setStatus('error'); }
+                return;
+            }
             try {
                 const res = await fetch(`${API}/state`, {
                     method: 'PUT',
@@ -645,6 +683,16 @@
         }
 
         async function uploadPhotoBlob(id, blob) {
+            if (staticMode) {
+                localPhotos[id] = await new Promise((ok, fail) => {
+                    const r = new FileReader();
+                    r.onload = () => ok(r.result);
+                    r.onerror = fail;
+                    r.readAsDataURL(blob);
+                });
+                persistLocalPhotos();
+                return;
+            }
             setStatus('saving');
             const res = await fetch(`${API}/photos/${encodeURIComponent(id)}`, {
                 method: 'POST',
@@ -1348,6 +1396,14 @@
         async function removeStudentPhoto(id) {
             const student = students.find(s => s.id === id);
             if (!student) return;
+            if (staticMode) {
+                delete localPhotos[id];
+                persistLocalPhotos();
+                if (photoOf(student)) alert('Энэ зураг repo-ийн photos/ хавтсанд байгаа тул тэндээс нь устгана уу.');
+                renderModalStudentLists();
+                renderSeatingView(false);
+                return;
+            }
             try {
                 const res = await fetch(`${API}/photos/${encodeURIComponent(id)}?name=${encodeURIComponent(student.name)}`, { method: 'DELETE' });
                 if (!res.ok) throw new Error(res.status);

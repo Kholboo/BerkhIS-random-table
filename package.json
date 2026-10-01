@@ -4,7 +4,8 @@
   "description": "Ангийн суудлын санамсаргүй хуваарилалт — зураг, хуваарилалтыг сервэрт хадгална",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "photos": "node make-photo-list.js"
   },
   "engines": {
     "node": ">=16"
