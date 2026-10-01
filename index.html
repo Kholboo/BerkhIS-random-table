@@ -803,19 +803,17 @@
             if (auth && !(await verifyPassword(r.cur))) { alert('Одоогийн нууц үг буруу байна.'); return; }
             const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
             auth = { salt, hash: await hashPassword(r.nw, salt) };
-            sessionStorage.setItem('seating_unlocked', auth.hash);
             saveToStorage();
             alert('Нууц үг хадгалагдлаа.');
         }
 
         async function requireAuth() {
             if (!cryptoOk()) { alert('Нууц үгийн хамгаалалт зөвхөн HTTPS эсвэл localhost дээр ажиллана.'); return false; }
-            if (!auth) { await changePassword(); return true; } // анхны удаа: нууц үг тохируулна (болих бол нэг удаа нэвтрүүлнэ)
-            if (sessionStorage.getItem('seating_unlocked') === auth.hash) return true;
+            if (!auth) { await changePassword(); return !!auth; } // нууц үг тохируулаагүй бол эхлээд тохируулна (болих бол үйлдэл хийгдэхгүй)
             for (let i = 0; i < 3; i++) {
                 const r = await pwDialog(i ? 'Нууц үг буруу. Дахин оролдоно уу' : 'Нууц үг оруулна уу', ['cur']);
                 if (!r) return false;
-                if (await verifyPassword(r.cur)) { sessionStorage.setItem('seating_unlocked', auth.hash); return true; }
+                if (await verifyPassword(r.cur)) return true;
             }
             return false;
         }
