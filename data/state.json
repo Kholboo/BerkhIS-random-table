@@ -4,7 +4,8 @@
    "id": "f1",
    "name": "Амирлан",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/1-1790814132776.png"
   },
   {
    "id": "f2",
