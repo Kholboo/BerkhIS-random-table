@@ -81,7 +81,8 @@
    "id": "f12",
    "name": "Цэлмүүн",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/25-1790816375876.png"
   },
   {
    "id": "m1",
