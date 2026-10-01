@@ -157,7 +157,8 @@
    "id": "m11",
    "name": "Цолмон",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/24-1790816245613.png"
   },
   {
    "id": "m12",
