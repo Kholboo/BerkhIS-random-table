@@ -114,7 +114,8 @@
    "id": "m6",
    "name": "Ган-Очир",
    "gender": "M",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/10-1790814306495.png"
   },
   {
    "id": "m7",
