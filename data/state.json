@@ -38,7 +38,8 @@
    "id": "f6",
    "name": "Номин-Эрдэнэ",
    "gender": "F",
-   "active": true
+   "active": true,
+   "photoUrl": "https://raw.githubusercontent.com/kholboo/BerkhIS-class-register/main/data/photos/15-1790815332575.png"
   },
   {
    "id": "f7",
